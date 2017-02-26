@@ -65,19 +65,6 @@ aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
 void loop()
 { 
-  reading = digitalRead(buttonPin);
-
-  // if the input just went from LOW and HIGH and we've waited long enough
-  // to ignore any noise on the circuit, toggle the output pin and remember
-  // the time
-  if (reading == HIGH && previous == LOW && millis() - time > debounce) {
-    Serial.println("Pressed button");
-    time = millis();    
-  }
-
-  previous = reading;
-
-  
   // Tell the nRF8001 to do whatever it should be working on.
   BTLEserial.pollACI();
 
@@ -138,12 +125,19 @@ void loop()
       BTLEserial.write(sendbuffer, sendbuffersize);
     }
 
-//    // read the state of the pushbutton value:
-//    buttonState = digitalRead(buttonPin);
-//    // check if the pushbutton is pressed.
-//    // if it is, the buttonState is HIGH:
-//    if (buttonState == HIGH) {
-//       BTLEserial.write();
-//    }
+    // Handle button pressed
+    reading = digitalRead(buttonPin);
+
+    // if the input just went from LOW and HIGH and we've waited long enough
+    // to ignore any noise on the circuit, toggle the output pin and remember
+    // the time
+    if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+      Serial.println("Pressed button");
+      time = millis();    
+    }    
+    previous = reading;
+
+    
+
   }
 }
