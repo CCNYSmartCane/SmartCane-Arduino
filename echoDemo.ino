@@ -27,13 +27,18 @@ All text above, and the splash screen below must be included in any redistributi
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
 const int buttonPin = 12;     // the number of the pushbutton pin
+const int sensorPin = A0;    // select the input pin for the potentiometer
 
-int reading;           // the current reading from the input pin
-int previous = HIGH;    // the previous reading from the input pin
+int buttonCurrent;           // the current reading from the input pin
+int buttonPrevious = HIGH;    // the previous reading from the input pin
+
+int sensorCurrent;  // variable to store the value coming from the sensor
+int sensorPrevious = 508; // 508 is the inital state of the sensor of the joystick
 
 // the follow variables are long's because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
-long time = millis();         // the last time the output pin was toggled
+long t1 = 0;         // the last time the output pin was toggled
+long t2 = 0;
 long debounce = 200;   // the debounce time, increase if the output flickers
 
 
@@ -126,18 +131,30 @@ void loop()
     }
 
     // Handle button pressed
-    reading = digitalRead(buttonPin);
+    buttonCurrent = digitalRead(buttonPin);
 
     // if the input just went from LOW and HIGH and we've waited long enough
     // to ignore any noise on the circuit, toggle the output pin and remember
     // the time
-    if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+    if (buttonCurrent == HIGH && buttonPrevious == LOW && millis() - t1 > debounce) {
       Serial.println("Pressed button");
-      time = millis();    
+      t1 = millis();    
     }    
-    previous = reading;
+    buttonPrevious = buttonCurrent;
 
-    
-
+    // Handle sensor joystick
+    sensorCurrent = analogRead(sensorPin);
+  
+    if (sensorCurrent == 508 && sensorPrevious != 508 && millis() - t2 > debounce) {
+        if (sensorPrevious > 508) {
+          Serial.println("Up");
+        } else if (sensorPrevious < 508) {
+          Serial.println("Down");
+        }
+        t2 = millis();    
+    }    
+    sensorPrevious = sensorCurrent;
   }
+
+
 }
