@@ -21,27 +21,10 @@ All text above, and the splash screen below must be included in any redistributi
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
-#define ADAFRUITBLE_RDY 7     // This should be an interrupt pin, on Uno thats #2 or #3
+#define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
-
-const int buttonPin = A3;     // the number of the pushbutton pin
-
-int buttonCurrent;           // the current reading from the input pin
-int buttonPrevious = HIGH;    // the previous reading from the input pin
-
-// the follow variables are long's because the time, measured in miliseconds,
-// will quickly become a bigger number than can be stored in an int.
-long t1 = 0;         // the last time the output pin was toggled
-long t2 = 0;
-long debounce = 20;   // the debounce time, increase if the output flickers
-
-// Vibration motor connected to digital pin 5 and 6
-int LeftMotor = 5;
-int RightMotor = 6;
-
-
 /**************************************************************************/
 /*!
     Configure the Arduino and start advertising with the radio
@@ -49,10 +32,6 @@ int RightMotor = 6;
 /**************************************************************************/
 void setup(void)
 { 
-  setupIMU();
-  // initialize the pushbutton pin as an input:
-  pinMode(buttonPin, INPUT);
-  
   Serial.begin(9600);
   while(!Serial); // Leonardo/Micro should wait for serial init
   Serial.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
@@ -70,7 +49,7 @@ void setup(void)
 aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
 void loop()
-{ 
+{
   // Tell the nRF8001 to do whatever it should be working on.
   BTLEserial.pollACI();
 
@@ -95,22 +74,12 @@ void loop()
   if (status == ACI_EVT_CONNECTED) {
     // Lets see if there's any data for us!
     if (BTLEserial.available()) {
-     // Serial.print("* "); Serial.print(BTLEserial.available()); Serial.println(F(" bytes available from BTLE"));
+      Serial.print("* "); Serial.print(BTLEserial.available()); Serial.println(F(" bytes available from BTLE"));
     }
-    // OK while we still have something to read, get the floats and print it out
+    // OK while we still have something to read, get a character and print it out
     while (BTLEserial.available()) {
-      // Union to share the same memory location for byte -> float conversion
-      union u_tag {
-        byte b[4];
-        float fval;
-      } u;
-      
-      u.b[3] = BTLEserial.read();
-      u.b[2] = BTLEserial.read();
-      u.b[1] = BTLEserial.read();
-      u.b[0] = BTLEserial.read();
-
-      handleRotation(u.fval);
+      char c = BTLEserial.read();
+      Serial.print(c);
     }
 
     // Next up, see if we have any data to get from the Serial console
@@ -130,24 +99,5 @@ void loop()
       // write the data
       BTLEserial.write(sendbuffer, sendbuffersize);
     }
-
-    // Handle button pressed
-    buttonCurrent = digitalRead(buttonPin);
-
-    // if the input just went from LOW and HIGH and we've waited long enough
-    // to ignore any noise on the circuit, toggle the output pin and remember
-    // the time
-    if (buttonCurrent == HIGH && buttonPrevious == LOW && millis() - t1 > debounce) {
-      Serial.println("Pressed button");
-      t1 = millis();   
-      BTLEserial.print("1"); //1 - select button clicked
-    }    
-    buttonPrevious = buttonCurrent;
-
-    // Handle sensor joystick
-    CheckJoystick();
   }
-
-
 }
-
