@@ -1,4 +1,5 @@
-s is an example for our nRF8001 Bluetooth Low Energy Breakout
+/*********************************************************************
+This is an example for our nRF8001 Bluetooth Low Energy Breakout
 
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products/1697
@@ -20,12 +21,12 @@ All text above, and the splash screen below must be included in any redistributi
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
-#define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
+#define ADAFRUITBLE_RDY 7     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
-const int buttonPin = 12;     // the number of the pushbutton pin
+const int buttonPin = A3;     // the number of the pushbutton pin
 const int sensorPin = A0;    // select the input pin for the potentiometer
 
 int buttonCurrent;           // the current reading from the input pin
@@ -40,6 +41,9 @@ long t1 = 0;         // the last time the output pin was toggled
 long t2 = 0;
 long debounce = 200;   // the debounce time, increase if the output flickers
 
+// Vibration motor connected to digital pin 5 and 6
+int LeftMotor = 5;
+int RightMotor = 6;
 
 /**************************************************************************/
 /*!
@@ -48,6 +52,7 @@ long debounce = 200;   // the debounce time, increase if the output flickers
 /**************************************************************************/
 void setup(void)
 { 
+  setupIMU();
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
   
@@ -108,7 +113,7 @@ void loop()
       u.b[1] = BTLEserial.read();
       u.b[0] = BTLEserial.read();
 
-      //Serial.print(u.fval); Serial.print(" ");
+      handleRotation(u.fval);
     }
 
     // Next up, see if we have any data to get from the Serial console
@@ -117,8 +122,6 @@ void loop()
       // Read a line from Serial
       Serial.setTimeout(100); // 100 millisecond timeout
       String s = Serial.readString();
-
-      //Serial.println("here");
 
       // We need to convert the line to bytes, no more than 20 at this time
       uint8_t sendbuffer[20];
