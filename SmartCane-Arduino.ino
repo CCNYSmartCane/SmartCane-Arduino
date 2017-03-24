@@ -47,7 +47,7 @@ const int JoystickPin = A0;    // select the input pin for the potentiometer
 int JoystickY;  // variable to store the value coming from the sensor
 int lastJoystickState = LOW; //LOW not press, HIGH Pressed
 
-long debounce = 500;   // the debounce time, increase if the output flickers
+long JoystickDebounce = 500;   // the debounce time, increase if the output flickers
 long pressedTime;
 /*************************************************************************************/
 
@@ -155,7 +155,7 @@ void loop()
     buttonPrevious = buttonCurrent;
 
     // Handle sensor joystick
-    CheckJoystick()
+    CheckJoystick();
   }
 
 
@@ -163,7 +163,7 @@ void loop()
 
 void CheckJoystick() {
         JoystickY = analogRead(JoystickPin);
-      if ((millis() - pressedTime) > debounce) {
+      if ((millis() - pressedTime) > JoystickDebounce) {
         lastJoystickState = LOW;
       }     
       if (lastJoystickState == LOW) {
