@@ -27,23 +27,30 @@ All text above, and the splash screen below must be included in any redistributi
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
 const int buttonPin = A3;     // the number of the pushbutton pin
-const int sensorPin = A0;    // select the input pin for the potentiometer
 
 int buttonCurrent;           // the current reading from the input pin
 int buttonPrevious = HIGH;    // the previous reading from the input pin
-
-int sensorCurrent;  // variable to store the value coming from the sensor
-int sensorPrevious = 508; // 508 is the inital state of the sensor of the joystick
 
 // the follow variables are long's because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
 long t1 = 0;         // the last time the output pin was toggled
 long t2 = 0;
-long debounce = 200;   // the debounce time, increase if the output flickers
+long debounce = 20;   // the debounce time, increase if the output flickers
 
 // Vibration motor connected to digital pin 5 and 6
 int LeftMotor = 5;
 int RightMotor = 6;
+
+/*************************************************************************************/
+// Joystick Setup
+const int JoystickPin = A0;    // select the input pin for the potentiometer
+int JoystickY;  // variable to store the value coming from the sensor
+int lastJoystickState = LOW; //LOW not press, HIGH Pressed
+
+long debounce = 500;   // the debounce time, increase if the output flickers
+long pressedTime;
+/*************************************************************************************/
+
 
 /**************************************************************************/
 /*!
@@ -148,20 +155,29 @@ void loop()
     buttonPrevious = buttonCurrent;
 
     // Handle sensor joystick
-    sensorCurrent = analogRead(sensorPin);
-  
-    if (sensorCurrent == 508 && sensorPrevious != 508 && millis() - t2 > debounce) {
-        if (sensorPrevious > 508) {
-          Serial.println("Up"); 
-          BTLEserial.print("2"); //2 - Up clicked
-        } else if (sensorPrevious < 508) {
-          Serial.println("Down"); 
-          BTLEserial.print("3"); //3 - Down clicked
-        }
-        t2 = millis();    
-    }    
-    sensorPrevious = sensorCurrent;
+    CheckJoystick()
   }
 
 
+}
+
+void CheckJoystick() {
+        JoystickY = analogRead(JoystickPin);
+      if ((millis() - pressedTime) > debounce) {
+        lastJoystickState = LOW;
+      }     
+      if (lastJoystickState == LOW) {
+        if (JoystickY > 800) {
+          lastJoystickState = HIGH;
+          pressedTime = millis();
+          Serial.println("Up"); 
+          BTLEserial.print("2"); //2 - Up clicked
+        } 
+        if (JoystickY < 200) {
+          lastJoystickState = HIGH;
+          pressedTime = millis();
+          Serial.println("Down"); 
+          BTLEserial.print("3"); //3 - Down clicked
+        }
+       }
 }
