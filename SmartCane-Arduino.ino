@@ -1,5 +1,4 @@
-/*********************************************************************
-This is an example for our nRF8001 Bluetooth Low Energy Breakout
+s is an example for our nRF8001 Bluetooth Low Energy Breakout
 
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products/1697
@@ -94,7 +93,7 @@ void loop()
   if (status == ACI_EVT_CONNECTED) {
     // Lets see if there's any data for us!
     if (BTLEserial.available()) {
-      Serial.print("* "); Serial.print(BTLEserial.available()); Serial.println(F(" bytes available from BTLE"));
+     // Serial.print("* "); Serial.print(BTLEserial.available()); Serial.println(F(" bytes available from BTLE"));
     }
     // OK while we still have something to read, get the floats and print it out
     while (BTLEserial.available()) {
@@ -109,7 +108,7 @@ void loop()
       u.b[1] = BTLEserial.read();
       u.b[0] = BTLEserial.read();
 
-      Serial.print(u.fval); Serial.print(" ");
+      //Serial.print(u.fval); Serial.print(" ");
     }
 
     // Next up, see if we have any data to get from the Serial console
@@ -118,6 +117,8 @@ void loop()
       // Read a line from Serial
       Serial.setTimeout(100); // 100 millisecond timeout
       String s = Serial.readString();
+
+      //Serial.println("here");
 
       // We need to convert the line to bytes, no more than 20 at this time
       uint8_t sendbuffer[20];
@@ -138,7 +139,8 @@ void loop()
     // the time
     if (buttonCurrent == HIGH && buttonPrevious == LOW && millis() - t1 > debounce) {
       Serial.println("Pressed button");
-      t1 = millis();    
+      t1 = millis();   
+      BTLEserial.print("1"); //1 - select button clicked
     }    
     buttonPrevious = buttonCurrent;
 
@@ -147,9 +149,11 @@ void loop()
   
     if (sensorCurrent == 508 && sensorPrevious != 508 && millis() - t2 > debounce) {
         if (sensorPrevious > 508) {
-          Serial.println("Up");
+          Serial.println("Up"); 
+          BTLEserial.print("2"); //2 - Up clicked
         } else if (sensorPrevious < 508) {
-          Serial.println("Down");
+          Serial.println("Down"); 
+          BTLEserial.print("3"); //3 - Down clicked
         }
         t2 = millis();    
     }    
