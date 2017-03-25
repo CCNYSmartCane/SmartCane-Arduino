@@ -55,8 +55,7 @@ long buttonLastDebounceTime = 0;         // the last time the output pin was tog
 long buttonDebounce = 500;   // the debounce time, increase if the output flickers
 /*************************************************************************************/
 
-int rotationButtonPressed = false;
-
+int YesConnected = false;
 /**************************************************************************/
 /*!
     Configure the Arduino and start advertising with the radio
@@ -107,8 +106,23 @@ void loop()
   }
 
   if (status == ACI_EVT_CONNECTED) {
+    //feedback for bluetooth connection established.
+    if(YesConnected == false && status == ACI_EVT_CONNECTED){
+      YesConnected = true;
+      analogWrite(LeftMotor, 255);
+      analogWrite(RightMotor, 255);
+      delay(500);
+      analogWrite(LeftMotor, 0);
+      analogWrite(RightMotor, 0);
+      delay(500);
+      analogWrite(LeftMotor, 255);
+      analogWrite(RightMotor, 255);
+      delay(500);
+      analogWrite(LeftMotor, 0);
+      analogWrite(RightMotor, 0);
+    }
+    
     // Lets see if there's any data for us!
-
     // OK while we still have something to read, get the floats and print it out
     while (BTLEserial.available()) {
       // Union to share the same memory location for byte -> float conversion
