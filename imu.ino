@@ -146,26 +146,32 @@ void setupIMU(void)
 void handleRotation(float rotationNeeded) {
   sensors_event_t event;
   bno.getEvent(&event);
-
+  //while the button is false wati in the while loop
+  rotationButtonPressed = false;
+  while (rotationButtonPressed = false) {
+    //reading button status
+    Serial.print("Waiting for button press");
+    CaneControlPanel();
+  } 
   float startOrientation = event.orientation.x;
   int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
 //  float deltaOrientation;
     
-  while(true) {
+  while(rotationButtonPressed) {
+    Serial.print("rotating");
+
     bno.getEvent(&event);
     startOrientation = event.orientation.x;
-//    deltaOrientation = goalOrientation-startOrientation;
     if ((int)startOrientation == goalOrientation) {
       // Send back via bluetooth that confirms we good 
       analogWrite(RightMotor, 0);
       analogWrite(LeftMotor, 0);
-
       BTLEserial.print("Rotation finished"); 
       break;
     } else {
       // Use motors
       int fadeValue = 255;
-      
+       
       if(rotationNeeded >= 0) {
           analogWrite(LeftMotor, fadeValue);
       } else {
