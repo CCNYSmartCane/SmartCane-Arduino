@@ -11,7 +11,6 @@ void CaneControlPanel() {
   if (buttonReading == HIGH && buttonState == LOW) {
       buttonState = HIGH;
       buttonLastDebounceTime = millis();
-      rotationButtonPressed = true;
       Serial.println("No");
       BTLEserial.print("1"); //1 - select button clicked
   }

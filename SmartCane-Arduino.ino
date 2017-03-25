@@ -121,7 +121,6 @@ void loop()
       u.b[2] = BTLEserial.read();
       u.b[1] = BTLEserial.read();
       u.b[0] = BTLEserial.read();
-      Serial.println("handleRotation");
       handleRotation(u.fval);
     }
     CaneControlPanel();
