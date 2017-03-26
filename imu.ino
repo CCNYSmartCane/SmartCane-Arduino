@@ -144,20 +144,21 @@ void setupIMU(void)
 /**************************************************************************/
 
 void handleRotation(float rotationNeeded) {
-  sensors_event_t event;
-  bno.getEvent(&event);
-  //while the button is false wati in the while loop
+  //while the button is false wait in the while loop
   rotationButtonPressed = false;
-  while (rotationButtonPressed = false) {
+  while (rotationButtonPressed == false) {
     //reading button status
     Serial.print("Waiting for button press");
     CaneControlPanel();
   } 
+
+  sensors_event_t event;
+  bno.getEvent(&event);
+  
   float startOrientation = event.orientation.x;
   int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
-//  float deltaOrientation;
     
-  while(rotationButtonPressed) {
+  while(true) {
     Serial.print("rotating");
 
     bno.getEvent(&event);
