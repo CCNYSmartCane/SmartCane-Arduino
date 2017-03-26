@@ -152,6 +152,8 @@ void handleRotation(float rotationNeeded) {
 //  float deltaOrientation;
 
   int deltaOrientation = 0;
+  int fadeValue = 0;
+  
   while(true) {
     bno.getEvent(&event);
     deltaOrientation = (event.orientation.x - goalOrientation) % 360;
@@ -164,7 +166,6 @@ void handleRotation(float rotationNeeded) {
       break;
     } else {
       // Use motors
-      int fadeValue = 0;
       if(deltaOrientation < 180) {
         fadeValue = map(deltaOrientation, 0, 179, 0, 255);
         analogWrite(LeftMotor, fadeValue);
