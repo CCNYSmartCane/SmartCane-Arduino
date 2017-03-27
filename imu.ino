@@ -144,12 +144,13 @@ void setupIMU(void)
 /**************************************************************************/
 
 void handleRotation(float rotationNeeded) {
-  sensors_event_t event;
-  bno.getEvent(&event);
+
   //waiting for button pressed.
   while (buttonReading!=HIGH){
     buttonReading = digitalRead(buttonPin);
   }
+    sensors_event_t event;
+  bno.getEvent(&event);
   float startOrientation = event.orientation.x;
   int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
 //  float deltaOrientation;
