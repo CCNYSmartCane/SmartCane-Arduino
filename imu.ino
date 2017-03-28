@@ -158,6 +158,7 @@ void handleRotation(float rotationNeeded) {
     if (buttonReading == HIGH && buttonState == LOW) {
         buttonState = HIGH;
         buttonLastDebounceTime = millis();
+        BTLEserial.print("1"); //1 - select button clicked
         break;
     }
   }
