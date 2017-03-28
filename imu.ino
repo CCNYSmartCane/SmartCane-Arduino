@@ -146,8 +146,20 @@ void setupIMU(void)
 void handleRotation(float rotationNeeded) {
 
   //waiting for button pressed.
-  while (buttonReading!=HIGH){
+  while (true){
+    // Handle button pressed
     buttonReading = digitalRead(buttonPin);
+  
+    // If the switch changed, due to noise or pressing:
+    if ((millis() - buttonLastDebounceTime) > buttonDebounce) {
+      buttonState = LOW;
+    }     
+    
+    if (buttonReading == HIGH && buttonState == LOW) {
+        buttonState = HIGH;
+        buttonLastDebounceTime = millis();
+        break;
+    }
   }
     sensors_event_t event;
   bno.getEvent(&event);
