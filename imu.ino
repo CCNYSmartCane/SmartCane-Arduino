@@ -173,6 +173,10 @@ void handleRotation(float rotationNeeded) {
   while(true) {
     bno.getEvent(&event);
     deltaOrientation = (int)(event.orientation.x - goalOrientation) % 360;
+    if (deltaOrientation < 0) {
+      deltaOrientation += 360;  
+    }
+    
     if (deltaOrientation == 0) {
       // Send back via bluetooth that confirms we good 
       analogWrite(RightMotor, 0);
@@ -184,9 +188,11 @@ void handleRotation(float rotationNeeded) {
       if(deltaOrientation < 180) {
         fadeValue = map(deltaOrientation, 0, 179, 0, 255);
         analogWrite(LeftMotor, fadeValue);
+        analogWrite(RightMotor, 0);
       } else {
         fadeValue = map(deltaOrientation, 180, 359, 255, 0);
-        analogWrite(RightMotor, fadeValue);        
+        analogWrite(RightMotor, fadeValue);  
+        analogWrite(LeftMotor, 0);
       }
     }
   }
