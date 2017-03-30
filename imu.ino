@@ -165,7 +165,7 @@ void handleRotation(float rotationNeeded) {
     sensors_event_t event;
   bno.getEvent(&event);
   float startOrientation = event.orientation.x;
-  int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
+  int goalOrientation = (int)(startOrientation - rotationNeeded);
 
   int deltaOrientation = 0;
   int fadeValue = 0;
