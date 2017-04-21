@@ -186,11 +186,11 @@ void handleRotation(float rotationNeeded) {
     } else {
       // Use motors
       if(deltaOrientation < 180) {
-        fadeValue = map(deltaOrientation, 0, 179, 0, 255);
+        fadeValue = map(deltaOrientation, 0, 179, 255, 0);
         analogWrite(LeftMotor, fadeValue);
         analogWrite(RightMotor, 0);
       } else {
-        fadeValue = map(deltaOrientation, 180, 359, 255, 0);
+        fadeValue = map(deltaOrientation, 180, 359, 0, 255);
         analogWrite(RightMotor, fadeValue);  
         analogWrite(LeftMotor, 0);
       }
