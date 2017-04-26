@@ -39,8 +39,5 @@ void CaneControlPanel() {
   }
 }
 
-void button(){
-  
-}
 
 

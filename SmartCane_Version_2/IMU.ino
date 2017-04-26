@@ -26,7 +26,6 @@
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 /**************************************************************************/
@@ -146,23 +145,15 @@ void setupIMU(void)
 void handleRotation(float rotationNeeded) {
 
   //waiting for button pressed.
+  delay(1000);
   while (true){
-    // Handle button pressed
-    buttonReading = digitalRead(buttonPin);
-  
-    // If the switch changed, due to noise or pressing:
-    if ((millis() - buttonLastDebounceTime) > buttonDebounce) {
-      buttonState = LOW;
-    }     
-    
-    if (buttonReading == HIGH && buttonState == LOW) {
-        buttonState = HIGH;
-        buttonLastDebounceTime = millis();
-        BTLEserial.print("1"); //1 - select button clicked
-        break;
+    if(greenButton("Status") == true || redButton("Status") == true)
+    {
+      Serial.println("virabtion");
+      break;
     }
   }
-    sensors_event_t event;
+  sensors_event_t event;
   bno.getEvent(&event);
   float startOrientation = event.orientation.x;
   int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
@@ -186,14 +177,15 @@ void handleRotation(float rotationNeeded) {
     } else {
       // Use motors
       if(deltaOrientation < 180) {
-        fadeValue = map(deltaOrientation, 0, 179, 0, 255);
+        fadeValue = map(deltaOrientation, 0, 179, 50, 255);
         analogWrite(LeftMotor, fadeValue);
         analogWrite(RightMotor, 0);
       } else {
-        fadeValue = map(deltaOrientation, 180, 359, 255, 0);
+        fadeValue = map(deltaOrientation, 180, 359, 255, 50);
         analogWrite(RightMotor, fadeValue);  
         analogWrite(LeftMotor, 0);
       }
     }
   }
 }
+

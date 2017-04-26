@@ -18,41 +18,56 @@ All text above, and the splash screen below must be included in any redistributi
 #include <SPI.h>
 #include "Adafruit_BLE_UART.h"
 
+/*************************************************************************************/
+// Bluetooth Setup
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
 #define ADAFRUITBLE_RDY 7     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
-
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
+/*************************************************************************************/
 
+/*************************************************************************************/
 // Vibration motor connected to digital pin 5 and 6
-int LeftMotor = 5;
-int RightMotor = 6;
+int LeftMotor = 6;
+int RightMotor = 5;
+/*************************************************************************************/
 
 /*************************************************************************************/
 // Joystick Setup
-const int JoystickPin = A0;    // select the input pin for the potentiometer
-int JoystickY;  // variable to store the value coming from the sensor
-int lastJoystickState = LOW; //LOW not press, HIGH Pressed
-
-long JoystickDebounce = 500;   // the debounce time, increase if the output flickers
-long pressedTime;
+const int JoystickPin = A1;    // select the input pin for the potentiometer
+int Joystick_Value;  // variable to store the value coming from the sensor
+long JoystickDebounce = 1000;
+long JoystickLastDebounceTime;
+int JoystickState;
+/*
+A0,
+Center  470
+Up    252
+Down  562
+Left    388
+Right 620
+A1
+Center  470
+Up    540
+Down  230
+Left    620
+Right 368
+ */
 /*************************************************************************************/
 
 /*************************************************************************************/
 // Button Setup
-const int buttonPin = A3;     // the number of the pushbutton pin
-const int JoystickButtonPin = A2;
-
-int buttonReading;           // the current reading from the input pin
-int buttonState;              // the status of the button
-int buttonPrevious = HIGH;    // the previous reading from the input pin
-
+const int GreenButton = A3;     // the number of the pushbutton pin
+const int RedButton = A2;
+// High = Pressed Down
+int RedButtonReading,GreenButtonReading;           // the current reading from the input pin
+int RedButtonState,GreenButtonState;              // the status of the button
 // the follow variables are long's because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
 long buttonLastDebounceTime = 0;         // the last time the output pin was toggled
-long buttonDebounce = 500;   // the debounce time, increase if the output flickers
+long buttonDebounce = 1000;   // the debounce time, increase if the output flickers
 /*************************************************************************************/
 
 int YesConnected = false;
@@ -61,17 +76,18 @@ int YesConnected = false;
     Configure the Arduino and start advertising with the radio
 */
 /**************************************************************************/
-void setup(void)
+void setup(void) 
 { 
   setupIMU();
   // initialize the pushbutton pin as an input:
-  pinMode(buttonPin, INPUT);
+  pinMode(GreenButton, INPUT);
+  pinMode(RedButton, INPUT);
   
   Serial.begin(9600);
+  
   Serial.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
 
   // BTLEserial.setDeviceName("NEWNAME"); /* 7 characters max! */
-
   BTLEserial.begin();
 }
 
@@ -139,7 +155,6 @@ void loop()
     }
     CaneControlPanel();
   }
-
 
 }
 
