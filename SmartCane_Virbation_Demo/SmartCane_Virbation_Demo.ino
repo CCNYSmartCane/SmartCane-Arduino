@@ -25,7 +25,9 @@ long buttonLastDebounceTime = 0;         // the last time the output pin was tog
 long buttonDebounce = 500;   // the debounce time, increase if the output flickers
 /*************************************************************************************/
 
-int ratation;
+int rotation;
+bool inputLoop = false;
+bool state1 = false;  
 
 void setup() {
   // put your setup code here, to run once:
@@ -48,8 +50,10 @@ void loop() {
   if (buttonReading == HIGH && buttonState == LOW) {
       buttonState = HIGH;
       buttonLastDebounceTime = millis();
-      ratation = random(45, 170);
-      handleRotation(ratation);
+      rotation = random(45, 170);
+      handleRotation(rotation);
+      state1 = false;
+      inputLoop = false;
   }
   
 }
@@ -89,7 +93,7 @@ void handleRotation(float rotationNeeded) {
     // If the switch changed, due to noise or pressing:
     if ((millis() - buttonLastDebounceTime) > buttonDebounce) {
       buttonState = LOW;
-    }     
+    }
     
     if (buttonReading == HIGH && buttonState == LOW) {
         buttonState = HIGH;
@@ -104,21 +108,31 @@ void handleRotation(float rotationNeeded) {
 
   int deltaOrientation = 0;
   int fadeValue = 0;
+  bool state = false;
   
-  while(true) {
+  while(true && state1 == false) {
     bno.getEvent(&event);
     deltaOrientation = (int)(event.orientation.x - goalOrientation) % 360;
     if (deltaOrientation < 0) {
       deltaOrientation += 360;  
     }
     
-    if (deltaOrientation == 0) {
-      // Send back via bluetooth that confirms we good 
-      analogWrite(RightMotor, 0);
-      analogWrite(LeftMotor, 0);
+    while (deltaOrientation == 0 && inputLoop == false) {
+      delay(500);
+      Serial.println("Hold button to confirm rotation");
+      // Send back user confirmtaion via bluetooth that confirms we good
+      if (digitalRead(buttonPin) == HIGH){
+        Serial.println("Rotation confirmed");
+        analogWrite(RightMotor, 0);
+        analogWrite(LeftMotor, 0);
+        inputLoop = true;
+        state1 = true;
+      }
       break;
-    } else {
+    }
+    if (deltaOrientation != 0 && inputLoop == false) {
       // Use motors
+      Serial.println(deltaOrientation);
       if(deltaOrientation < 180) {
         fadeValue = map(deltaOrientation, 0, 179, 30, 255);
         analogWrite(LeftMotor, fadeValue);
