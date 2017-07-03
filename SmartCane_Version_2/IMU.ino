@@ -13,7 +13,7 @@
    provide an appropriate value in the constructor below (12345
    is used by default in this example).
    Connections
-   ===========
+   ===========  
    Connect SCL to analog 5
    Connect SDA to analog 4
    Connect VDD to 3-5V DC
@@ -141,20 +141,26 @@ void setupIMU(void)
     should go here)
 */
 /**************************************************************************/
+bool rotating = false;
 
 void handleRotation(float rotationNeeded) {
 
   //waiting for button pressed.
   delay(1000);
   while (true){
+    Serial.println("Press a button to confirm angle");
     if(greenButton("Status") == true || redButton("Status") == true)
     {
-      Serial.println("virabtion");
+      Serial.println("Vibration");
       break;
     }
   }
+  if (rotating == true)
+    return;
+    
   sensors_event_t event;
   bno.getEvent(&event);
+
   float startOrientation = event.orientation.x;
   int goalOrientation = (int)(startOrientation - rotationNeeded) % 360;
 
@@ -167,14 +173,58 @@ void handleRotation(float rotationNeeded) {
     if (deltaOrientation < 0) {
       deltaOrientation += 360;  
     }
-    
-    if (deltaOrientation == 0) {
-      // Send back via bluetooth that confirms we good 
-      analogWrite(RightMotor, 0);
-      analogWrite(LeftMotor, 0);
-      BTLEserial.print("Rotation finished"); 
-      break;
+    inputLoop = false;
+// Red Reset Button    
+    if ((digitalRead(RedButton) == HIGH)&&(!pressed)){
+      if(!pressed){
+        Serial.println("RedButton pressed");
+        pressedTime = millis();
+        pressed = true;
+      }
+    } else if((digitalRead(RedButton) == HIGH)&&(pressed)) {
+      if((millis() - pressedTime) > 2500 && (millis() - pressedTime) < 5000){
+        int deltaOrientation = 0;
+        pressed = false;
+        Serial.println("Reset Motors");
+        BTLEserial.print("Reset Motors");
+        BTLEserial.print("4"); 
+        analogWrite(LeftMotor, 0);
+        analogWrite(RightMotor, 0);
+        break;
+      }
+      else if((millis() - pressedTime) > 5000){
+        int deltaOrientation = 0;
+        pressed = false;
+        analogWrite(LeftMotor, 0);
+        analogWrite(RightMotor, 0);
+        //HOW DO I RESET THE BLUETOOTH CONNECTION?????????????????????????????????????
+        Serial.println("Reset Bluetooth Connection");
+        BTLEserial.print("Reset Bluetooth Connection");
+        break;
+      }
     } else {
+      pressed = false;
+      rotating = false;
+    }
+    
+    while (deltaOrientation == 0 && inputLoop == false) {
+      delay(500);
+      // Send back user confirmation via bluetooth that confirms we good 
+      if (digitalRead(GreenButton) == HIGH){
+        Serial.println("Rotation confirmed");
+        analogWrite(RightMotor, 0);
+        analogWrite(LeftMotor, 0);
+        BTLEserial.println("Rotation Confirmed");
+        Serial.println("Rotation Confirmed");
+        inputLoop = true;
+      }
+      break;
+    }
+      BTLEserial.print("Rotation finished"); 
+      Serial.println("Rotation finished");
+      rotating = false;
+      break; 
+    } if (deltaOrientation != 0) {
       // Use motors
       if(deltaOrientation < 180) {
         fadeValue = map(deltaOrientation, 0, 179, 50, 255);
@@ -184,8 +234,6 @@ void handleRotation(float rotationNeeded) {
         fadeValue = map(deltaOrientation, 180, 359, 255, 50);
         analogWrite(RightMotor, fadeValue);  
         analogWrite(LeftMotor, 0);
-      }
     }
   }
 }
-
