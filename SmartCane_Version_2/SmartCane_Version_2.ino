@@ -19,7 +19,7 @@ All text above, and the splash screen below must be included in any redistributi
 #include "Adafruit_BLE_UART.h"
 
 /*************************************************************************************/
-// Bluetooth Setup
+// Bluetooth Setuppress
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
@@ -38,7 +38,7 @@ int RightMotor = 5;
 // Joystick Setup
 const int JoystickPin = A1;    // select the input pin for the potentiometer
 int Joystick_Value;  // variable to store the value coming from the sensor
-long JoystickDebounce = 1000;
+long JoystickDebounce = 500;
 long JoystickLastDebounceTime;
 int JoystickState;
 /*
@@ -70,6 +70,18 @@ long buttonLastDebounceTime = 0;         // the last time the output pin was tog
 long buttonDebounce = 1000;   // the debounce time, increase if the output flickers
 /*************************************************************************************/
 
+/*************************************************************************************/
+// Red Reset Button Setup
+float pressedTime;    // the time the red button is pressed
+bool pressed = false;   // default pressed position
+/*************************************************************************************/
+
+/*************************************************************************************/
+// Rotation User Confirmation Setup
+bool inputLoop = false; 
+/*************************************************************************************/
+
+/*************************************************************************************/
 int YesConnected = false;
 /**************************************************************************/
 /*!
@@ -110,12 +122,15 @@ void loop()
     // print it out!
     if (status == ACI_EVT_DEVICE_STARTED) {
         Serial.println(F("* Advertising started"));
+        YesConnected = false;
     }
     if (status == ACI_EVT_CONNECTED) {
         Serial.println(F("* Connected!"));
+        BTLEserial.print("SmartCane Connected!");
     }
     if (status == ACI_EVT_DISCONNECTED) {
         Serial.println(F("* Disconnected or advertising timed out"));
+        BTLEserial.print("SmartCane Disconnected");
     }
     // OK set the last status change to this one
     laststatus = status;
@@ -136,6 +151,7 @@ void loop()
       delay(500);
       analogWrite(LeftMotor, 0);
       analogWrite(RightMotor, 0);
+      
     }
     
     // Lets see if there's any data for us!
@@ -146,16 +162,13 @@ void loop()
         byte b[4];
         float fval;
       } u;
-      
       u.b[3] = BTLEserial.read();
       u.b[2] = BTLEserial.read();
       u.b[1] = BTLEserial.read();
       u.b[0] = BTLEserial.read();
+      Serial.println(u.fval);
       handleRotation(u.fval);
     }
     CaneControlPanel();
   }
-
 }
-
-
