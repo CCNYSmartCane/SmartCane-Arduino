@@ -41,12 +41,30 @@ int redButton(String sendResponseToPhone){
       Serial.println("RedButton Pressed");
       if (sendResponseToPhone == "Yes"){
         Serial.println("RedButton Send Bluetooth");
-        BTLEserial.print("1"); //1 - select button clicked
+        BTLEserial.print("4"); //4 - select button clicked
       } else if (sendResponseToPhone == "Status"){
         Serial.println("RedButton return true");
-        BTLEserial.print("1"); //1 - select button clicked
+        BTLEserial.print("4"); //4 - select button clicked
         return true;
       }  }
+//Red Button Reset Motors
+if ((digitalRead(RedButton) == HIGH)&&(!pressed)){
+      if(!pressed){
+        pressedTime = millis();
+        pressed = true;
+      }
+    } else if((digitalRead(RedButton) == HIGH)&&(pressed)) {
+      if((millis() - pressedTime) > 2500){
+        analogWrite(LeftMotor, 0);
+        analogWrite(RightMotor, 0);
+        Serial.println("Motor off");
+        pressed = false;
+        BTLEserial.print("4"); 
+      }
+    } else {
+      pressed = false;
+  }
+
 }
 
 void Joystick(){
@@ -65,23 +83,22 @@ Right 368
   if ((millis() - JoystickLastDebounceTime) > JoystickDebounce) {
     JoystickState = LOW;
   }     
-
   if (JoystickState == LOW) {
-    if (Joystick_Value > 530) {
-      JoystickState = HIGH;
-      JoystickLastDebounceTime = millis();
-      Serial.println(Joystick_Value);
-      Serial.println("Up"); 
-      BTLEserial.print("2"); //2 - Up clicked
-    } 
-    if (Joystick_Value < 270) {
+    if (Joystick_Value < 320) {
       JoystickState = HIGH;
       JoystickLastDebounceTime = millis();
       Serial.println(Joystick_Value);
       Serial.println("Down"); 
+      BTLEserial.print("Prior Destination");
       BTLEserial.print("3"); //3 - Down clicked
+    }
+    if (Joystick_Value > 500) {
+      JoystickState = HIGH;
+      JoystickLastDebounceTime = millis();
+      Serial.println(Joystick_Value);
+      Serial.println("Up"); 
+      BTLEserial.print("Next Destination");
+      BTLEserial.print("2"); //2 - Up clicked
     }
   }
 }
-
-
