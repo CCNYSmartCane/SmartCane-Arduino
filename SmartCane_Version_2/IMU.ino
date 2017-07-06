@@ -147,10 +147,9 @@ void handleRotation(float rotationNeeded) {
   //waiting for button pressed.
   delay(500);
   while (true){
-    Serial.println("Press a button to confirm angle");
-    if(greenButton("Status") == true || redButton("Status") == true){
+    Serial.println("Press the Green Button to confirm angle");
+    if(greenButton("Status") == true){
       Serial.println("Vibration");
-      
     break;
     }
   }
@@ -172,7 +171,7 @@ void handleRotation(float rotationNeeded) {
     }
     
 // Red Reset Button
-    if ((digitalRead(RedButton) == HIGH)&&(!pressed)){
+/*    if ((digitalRead(RedButton) == HIGH)&&(!pressed)){
       if(!pressed){
         Serial.println("RedButton pressed");
         pressedTime = millis();
@@ -183,12 +182,46 @@ void handleRotation(float rotationNeeded) {
         pressed = false;
         Serial.println("Reset Motors");
         BTLEserial.print("Reset Motors");
-        BTLEserial.print("4"); 
         analogWrite(LeftMotor, 0);
         analogWrite(RightMotor, 0);
         return false;
+        delay(1000);
+      }
+    }*/
+
+
+
+// Read the state of the button
+  buttonVal = digitalRead(RedButton);
+// Test for button pressed and store the down time
+    if (buttonVal == HIGH && buttonLast == LOW && (millis() - btnUpTime) > long(debounce)){
+        btnDnTime = millis();
+    }
+// Test for button release and store the up time
+    if (buttonVal == LOW && buttonLast == HIGH && (millis() - btnDnTime) > long(debounce)){
+      if (ignoreUp == false){
+        Serial.println("RedButton PressedTEST");
+        BTLEserial.print("4"); //4 - select button clicked
+      }
+      else {ignoreUp = false;
+      btnUpTime = millis();
       }
     }
+// Test for button held down for longer than the hold time
+    if (buttonVal == HIGH && (millis() - btnDnTime) > long(holdTime)){
+      Serial.println("Reset Motors");
+      BTLEserial.print("Reset Motors");
+      analogWrite(LeftMotor, 0);
+      analogWrite(RightMotor, 0);
+      return false;
+      ignoreUp = true;
+      btnDnTime = millis();
+      delay(1500);
+    }
+buttonLast = buttonVal;
+
+
+
 
 Serial.println(deltaOrientation);
 
@@ -206,8 +239,7 @@ Serial.println(deltaOrientation);
       analogWrite(RightMotor, 0);
       analogWrite(LeftMotor, 0);
       BTLEserial.println("Rotation Finished");
-
-  return false;
+      return false;
 }
 
   if (deltaOrientation != 0 && deltaOrientation != 1 && deltaOrientation != 359) {
