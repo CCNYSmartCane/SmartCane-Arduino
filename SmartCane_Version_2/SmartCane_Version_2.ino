@@ -38,7 +38,7 @@ int RightMotor = 5;
 // Joystick Setup
 const int JoystickPin = A1;    // select the input pin for the potentiometer
 int Joystick_Value;  // variable to store the value coming from the sensor
-long JoystickDebounce = 500;
+long JoystickDebounce = 1250;
 long JoystickLastDebounceTime;
 int JoystickState;
 /*
@@ -67,13 +67,24 @@ int RedButtonState,GreenButtonState;              // the status of the button
 // the follow variables are long's because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
 long buttonLastDebounceTime = 0;         // the last time the output pin was toggled
-long buttonDebounce = 1000;   // the debounce time, increase if the output flickers
+long buttonDebounce = 500;   // the debounce time, increase if the output flickers
+/*************************************************************************************/
+
+/*************************************************************************************/
+// Red Button variables
+int buttonVal = 0; // value read from button
+int buttonLast = 0; // buffered value of the button's previous state
+long btnDnTime; // time the button was pressed down
+long btnUpTime; // time the button was released
+boolean ignoreUp = false; // whether to ignore the button release because the click+hold was triggered
+#define debounce 100 // ms debounce period to prevent flickering when pressing or releasing the button
+#define holdTime 2500 // ms hold period: how long to wait for press+hold event
 /*************************************************************************************/
 
 /*************************************************************************************/
 // Red Reset Button Setup
-float pressedTime;    // the time the red button is pressed
-bool pressed = false;   // default pressed position
+/*float pressedTime;    // the time the red button is pressed
+bool pressed = false;   // default pressed position*/
 /*************************************************************************************/
 
 /*************************************************************************************/
@@ -166,3 +177,37 @@ void loop()
     CaneControlPanel();
   }
 }
+/*// Read the state of the button
+  buttonVal = digitalRead(RedButton);
+// Test for button pressed and store the down time
+    if (buttonVal == HIGH && buttonLast == LOW && (millis() - btnUpTime) > long(debounce)){
+        btnDnTime = millis();
+    }
+// Test for button release and store the up time
+    if (buttonVal == LOW && buttonLast == HIGH && (millis() - btnDnTime) > long(debounce)){
+      if (ignoreUp == false) event1();
+      else ignoreUp = false;
+      btnUpTime = millis();
+    }
+// Test for button held down for longer than the hold time
+    if (buttonVal == HIGH && (millis() - btnDnTime) > long(holdTime)){
+      event2();
+      ignoreUp = true;
+      btnDnTime = millis();
+    }
+buttonLast = buttonVal;
+}
+
+void event1(){
+  Serial.println("RedButton PressedTEST");
+  BTLEserial.print("4"); //4 - select button clicked
+}
+
+void event2(){
+  Serial.println("Reset Motors");
+  BTLEserial.print("Reset Motors");
+  analogWrite(LeftMotor, 0);
+  analogWrite(RightMotor, 0);
+  return false;
+}
+*/
