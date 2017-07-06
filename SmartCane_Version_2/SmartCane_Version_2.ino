@@ -9,8 +9,8 @@ please support Adafruit and open-source hardware by purchasing
 products from Adafruit!
 
 Written by Kevin Townsend/KTOWN  for Adafruit Industries.
-MIT license, check LICENSE for more information
-All text above, and the splash screen below must be included in any redistribution
+MIT license, check LICENSE for more All text above, and the splash screen below must be included in any redistribution
+information
 *********************************************************************/
 
 // This version uses the internal data queing so you can treat it like Serial (kinda)!
@@ -77,11 +77,6 @@ bool pressed = false;   // default pressed position
 /*************************************************************************************/
 
 /*************************************************************************************/
-// Rotation User Confirmation Setup
-bool inputLoop = false; 
-/*************************************************************************************/
-
-/*************************************************************************************/
 int YesConnected = false;
 /**************************************************************************/
 /*!
@@ -111,7 +106,7 @@ void setup(void)
 aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
 void loop()
-{ 
+{
   // Tell the nRF8001 to do whatever it should be working on.
   BTLEserial.pollACI();
 
@@ -151,7 +146,6 @@ void loop()
       delay(500);
       analogWrite(LeftMotor, 0);
       analogWrite(RightMotor, 0);
-      
     }
     
     // Lets see if there's any data for us!
