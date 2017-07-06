@@ -20,11 +20,12 @@ int greenButton(String sendResponseToPhone){
       if (sendResponseToPhone == "Yes"){
         Serial.println("GreenButton Send Bluetooth");
         BTLEserial.print("1"); //1 - select button clicked
-      } else if (sendResponseToPhone == "Status"){
+      } 
+      else if (sendResponseToPhone == "Status"){
         Serial.println("GreenButton return true");
         BTLEserial.print("1"); //1 - select button clicked
         return true;
-      }
+    }
   }
 }
 
@@ -42,29 +43,13 @@ int redButton(String sendResponseToPhone){
       if (sendResponseToPhone == "Yes"){
         Serial.println("RedButton Send Bluetooth");
         BTLEserial.print("4"); //4 - select button clicked
-      } else if (sendResponseToPhone == "Status"){
+      } 
+      else if (sendResponseToPhone == "Status"){
         Serial.println("RedButton return true");
         BTLEserial.print("4"); //4 - select button clicked
         return true;
-      }  }
-//Red Button Reset Motors
-if ((digitalRead(RedButton) == HIGH)&&(!pressed)){
-      if(!pressed){
-        pressedTime = millis();
-        pressed = true;
-      }
-    } else if((digitalRead(RedButton) == HIGH)&&(pressed)) {
-      if((millis() - pressedTime) > 2500){
-        analogWrite(LeftMotor, 0);
-        analogWrite(RightMotor, 0);
-        Serial.println("Motor off");
-        pressed = false;
-        BTLEserial.print("4"); 
-      }
-    } else {
-      pressed = false;
+    }
   }
-
 }
 
 void Joystick(){
